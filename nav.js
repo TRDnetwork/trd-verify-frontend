@@ -34,7 +34,7 @@
     + '</style>';
 
   var html = '<nav class="dcsnav"><div class="in">'
-    + '<a class="b" href="index.html"><img class="mk" src="/brand/logo-mark.png" alt="DCS Labs Verify"><span class="bt"><b>DCS&nbsp;Labs</b><small>VERIFY</small></span></a>'
+    + '<a class="b" href="https://dcslabs.ai/"><img class="mk" src="/brand/logo-mark.png" alt="DCS Labs Verify"><span class="bt"><b>DCS&nbsp;Labs</b><small>VERIFY</small></span></a>'
     + '<div class="lk">'
     + links.map(function(x){ return '<a class="l' + (x.href === here ? ' on' : '') + '" href="' + x.href + '">' + x.label + '</a>'; }).join('')
     + '<a class="cta" href="' + cta.href + '">' + cta.label + '</a>'
