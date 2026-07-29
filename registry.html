@@ -155,7 +155,7 @@
     const wh = $("why-h"); if (wh) wh.textContent = heading || "Details";
   }
 
-  // A build session is a UUID (verify.dcsai.ai/?id=<session>), NOT an issuer.
+  // A build session is a UUID (verify.dcslabs.ai/?id=<session>), NOT an issuer.
   // If someone lands here with a session UUID as ?issuer=, the per-issuer lookup
   // would always 404 — point them at the build-verify page instead of showing a
   // misleading "unavailable" card.
@@ -171,12 +171,12 @@
     document.querySelector(".logo").textContent = meta[2];
     if (isSessionUuid) {
       hideIssuerChrome("Build session");
-      return honestUnavailable(`"${issuer}" is a build session, not an issuer. To verify a built site, open verify.dcsai.ai/?id=${issuer} — this page is for issuer profiles (e.g. ?issuer=dcslabs).`);
+      return honestUnavailable(`"${issuer}" is a build session, not an issuer. To verify a built site, open verify.dcslabs.ai/?id=${issuer} — this page is for issuer profiles (e.g. ?issuer=dcslabs).`);
     }
     if (isReceiptCid) {
       $("p-name").textContent = "Receipt CID"; $("p-did").textContent = issuer;
       hideIssuerChrome("About this receipt");
-      return honestUnavailable(`That's a receipt CID, not an issuer — so it has no issuer stats (trust score, issued, verifications). A receipt lives in the network feed, not the issuer registry. Verify it at verify.dcsai.ai/verify, see it in the Explorer, or read the raw JSON at gateway.lighthouse.storage/ipfs/${issuer}. To inspect who signed it, open ?issuer=dcslabs.`);
+      return honestUnavailable(`That's a receipt CID, not an issuer — so it has no issuer stats (trust score, issued, verifications). A receipt lives in the network feed, not the issuer registry. Verify it at verify.dcslabs.ai/verify, see it in the Explorer, or read the raw JSON at gateway.lighthouse.storage/ipfs/${issuer}. To inspect who signed it, open ?issuer=dcslabs.`);
     }
     try {
       const r = await fetch(`${API}/registry/${issuer}`, { headers: { "accept":"application/json" } });

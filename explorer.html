@@ -277,7 +277,7 @@
     if (!q) return;
     // A receipt / session ID → jump straight to independent verification.
     if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(q)) {
-      location.href = "https://verify.dcsai.ai/?id=" + encodeURIComponent(q); return;
+      location.href = "/?id=" + encodeURIComponent(q); return;
     }
     const box = $("portal-result");
     if (/^https?:\/\//i.test(q) || q.includes(".")) {

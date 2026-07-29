@@ -19,8 +19,11 @@
   var css = '<style>'
     + '.dcsnav{position:sticky;top:0;z-index:50;border-bottom:1px solid #1f1f29;background:rgba(10,10,15,.82);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}'
     + '.dcsnav .in{max-width:1480px;margin:0 auto;padding:0 24px;height:62px;display:flex;align-items:center;justify-content:space-between;gap:18px}'
-    + '.dcsnav .b{display:flex;align-items:center;gap:9px;font:700 16px/1 "Inter",system-ui,sans-serif;color:#e8e8ec;text-decoration:none;white-space:nowrap}'
-    + '.dcsnav .b .mk{width:24px;height:24px;border:1.5px solid #1e7eff;border-radius:7px;display:grid;place-items:center;color:#1e7eff;font-size:12px}'
+    + '.dcsnav .b{display:flex;align-items:center;gap:10px;text-decoration:none;white-space:nowrap}'
+    + '.dcsnav .b .mk{width:34px;height:34px;object-fit:contain;display:block}'
+    + '.dcsnav .b .bt{display:inline-block;line-height:1.02;font-family:"Inter",system-ui,sans-serif}'
+    + '.dcsnav .b .bt b{display:block;font-size:16px;font-weight:800;color:#e8e8ec;letter-spacing:-.01em}'
+    + '.dcsnav .b .bt small{display:block;font-size:8px;font-weight:800;letter-spacing:.26em;color:#4aa3ff;margin-top:1px}'
     + '.dcsnav .lk{display:flex;align-items:center;gap:22px;flex:1;justify-content:flex-end}'
     + '.dcsnav a.l{font:500 14px/1 "Inter",system-ui,sans-serif;color:#9c9ca8;text-decoration:none;white-space:nowrap}'
     + '.dcsnav a.l:hover{color:#e8e8ec}'
@@ -31,7 +34,7 @@
     + '</style>';
 
   var html = '<nav class="dcsnav"><div class="in">'
-    + '<a class="b" href="index.html"><span class="mk">◆</span> DCS Verify</a>'
+    + '<a class="b" href="index.html"><img class="mk" src="/brand/logo-mark.png" alt="DCS Labs Verify"><span class="bt"><b>DCS&nbsp;Labs</b><small>VERIFY</small></span></a>'
     + '<div class="lk">'
     + links.map(function(x){ return '<a class="l' + (x.href === here ? ' on' : '') + '" href="' + x.href + '">' + x.label + '</a>'; }).join('')
     + '<a class="cta" href="' + cta.href + '">' + cta.label + '</a>'

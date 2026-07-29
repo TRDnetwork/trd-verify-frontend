@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0a0a0f">
 <title>Verification Test Matrix — DCS Verify</title>
 <meta name="description" content="DCS verification & compliance test matrix — Merkle-batched and individual per-receipt anchoring, each with on-chain proof anyone can re-check." />
-<link rel="canonical" href="https://verify.dcsai.ai/compliance.html">
+<link rel="canonical" href="/compliance.html">
 <link rel="icon" href="/brand/logo-mark-circle.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -178,7 +178,7 @@
       kv += '<span class="k">Last tx</span><span class="v"><a href="'+BASESCAN+esc(p.lastTx)+'" target="_blank" rel="noopener">'+esc(p.lastTx)+' ↗</a></span>';
       kv += '<span class="k">Full report</span><span class="v"><a href="'+esc(p.report)+'" target="_blank" rel="noopener">all '+esc(p.txns)+' transactions (JSON) ↗</a></span>';
     }
-    if(p.session) kv += '<span class="k">Verify yourself</span><span class="v"><a href="/?id='+esc(p.session)+'" target="_blank" rel="noopener">verify.dcsai.ai/?id='+esc(p.session.slice(0,8))+'… ↗</a></span>';
+    if(p.session) kv += '<span class="k">Verify yourself</span><span class="v"><a href="/?id='+esc(p.session)+'" target="_blank" rel="noopener">verify.dcslabs.ai/?id='+esc(p.session.slice(0,8))+'… ↗</a></span>';
     return '<div class="card"><div class="ch"><span class="dot"></span><h3>'+esc(t.name)+' — PASSED</h3></div><div class="kv">'+kv+'</div></div>';
   }).join('') || '<div class="muted">Evidence cards appear here as anchored tests complete.</div>';
 })();

@@ -128,7 +128,7 @@
 
 <footer>
   <div class="wrap">
-    <div><a class="brand" href="index.html"><img src="/brand/logo-mark-circle.png" alt="DCS Verify" style="height:34px;width:34px;vertical-align:middle;margin-right:8px;display:inline-block"> DCS Verify</a>
+    <div><a class="brand" href="index.html"><img src="/brand/logo-mark-circle.png" alt="DCS Labs" style="height:34px;width:34px;vertical-align:middle;margin-right:8px;display:inline-block"> DCS Labs</a>
       <p class="foot-legal">DCS Verify, a product of DCS AI Technologies L.L.C.</p></div>
     <div class="cols"><div><h5>Product</h5><a href="verify.html">Verify</a><a href="dashboard.html">Issuer console</a><a href="pricing.html">Pricing</a></div></div>
   </div>
@@ -184,7 +184,7 @@
         '<ul class="checks">'+
           '<li>'+mark(ok)+'Content-address match (CID = SHA-256 of these bytes)</li>'+
           '<li>'+mark(!!sig.value)+'Signed '+(sig.algo||"")+(sig.key_id?(" · "+sig.key_id):"")+'</li>'+
-          '<li>'+mark(null)+'On-chain anchor — see the full chain at <a href="https://verify.dcsai.ai/?id='+(rec.session_id||"")+'" target="_blank" rel="noopener">verify by session ↗</a></li>'+
+          '<li>'+mark(null)+'On-chain anchor — see the full chain at <a href="/?id='+(rec.session_id||"")+'" target="_blank" rel="noopener">verify by session ↗</a></li>'+
         '</ul></div>'+
       '<div class="vcard"><label class="lbl">Receipt</label><div class="raw">'+
         jrow("Kind",rec.kind)+jrow("Session",rec.session_id)+
@@ -217,7 +217,7 @@
     var input=document.getElementById("cid").value.trim(), docText=document.getElementById("doc").value.trim(), document_=null;
     if(!input) return;
     // Build session UUID → the build-verify view (shows the whole chain).
-    if(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input)){ location.href="https://verify.dcsai.ai/?id="+encodeURIComponent(input); return; }
+    if(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(input)){ location.href="/?id="+encodeURIComponent(input); return; }
     // IPFS receipt CID → verify client-side, no backend needed.
     if(/^ba[fg][a-z2-7]{20,}$/i.test(input)){ verifyReceiptCid(input); return; }
     if(docText){ try{document_=JSON.parse(docText);}catch(e){return err("Document isn't valid JSON.");} }
