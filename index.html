@@ -301,12 +301,13 @@
     // per-row ✓ reflects reality (these receipts ARE signed — 38/38 valid) and
     // doesn't render an empty "—" column against a fully-signed chain.
     var sig = (r.signed || (r.signature && r.signature.value)) ? '✓' : '—';
-    // Raw JSON opens the canonical receipt straight from the verified chain data
-    // already loaded on this page — same-origin, valid TLS, no dependency on a
-    // third-party IPFS gateway's certificate or uptime (the old link went to
-    // gateway.lighthouse.storage, whose cert throws NET::ERR_CERT_COMMON_NAME_INVALID).
-    // The printed CID stays the trust root: re-hash this JSON and it must equal the CID.
-    var hc = hash ? '<a href="#" onclick="return openRcpt('+i+')" title="Open the raw signed receipt JSON" style="color:#4aa3ff;text-decoration:none;word-break:break-all;cursor:pointer">'+esc(hash)+'</a>' : '—';
+    // Open the raw signed receipt directly from the storage gateway over our own
+    // valid TLS: api.dcsai.ai/ipfs/<cid> proxies to the account's Lighthouse
+    // gateway (the generic gateway.lighthouse.storage 402s; this one works). A
+    // plain target=_blank link always opens — no popup-blocked Blob, no reliance
+    // on the slim receipts embedded in the verify payload. The printed CID stays
+    // the trust root: the gateway serves the exact bytes whose sha256 IS this CID.
+    var hc = hash ? '<a href="'+STORAGE+'/ipfs/'+encodeURIComponent(hash)+'" target="_blank" rel="noopener" title="Open the raw signed receipt JSON" style="color:#4aa3ff;text-decoration:none;word-break:break-all;cursor:pointer">'+esc(hash)+'</a>' : '—';
     var bt='1px solid #1f1f29';
     return '<tr>'
       +'<td style="color:#6a6a78;padding:7px 10px;border-top:'+bt+';font-variant-numeric:tabular-nums">'+(i+1)+'</td>'
