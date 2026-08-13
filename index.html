@@ -207,6 +207,57 @@
     var b=document.getElementById('bvRetry');
     if(b) b.onclick=function(){ amber('Verifying…'); load(1); };
   }
+  // ---- Session proof bundle: one self-contained file that proves the whole
+  // session (verify summary + full receipt chain + Merkle root + anchor + key). ----
+  function fetchChain(){
+    if(LAST_DATA && LAST_DATA.receipts && LAST_DATA.receipts.length) return Promise.resolve(LAST_DATA.receipts);
+    if(RCPTS && RCPTS.length) return Promise.resolve(RCPTS);
+    return fetch(STORAGE+'/api/storage/unified-chain/'+encodeURIComponent(id))
+      .then(function(r){ return r.ok?r.json():{}; })
+      .then(function(d){ return (d&&d.receipts)||[]; })
+      .catch(function(){ return (RCPTS&&RCPTS.length)?RCPTS:[]; });
+  }
+  function buildBundle(receipts){
+    var d=LAST_DATA||{};
+    return {
+      format:'dcs-session-proof/v1',
+      generated_at:new Date().toISOString(),
+      session_id:id,
+      verify_url:'https://verify.dcslabs.ai/?id='+id,
+      valid: !!(d.status==='valid' && d.signature && d.signature.valid),
+      cid:d.cid||null,
+      signature:d.signature||null,
+      anchor:d.anchor||null,
+      merkle_root:(d.anchor&&d.anchor.root)||null,
+      receipt_count:d.receipt_count||(receipts?receipts.length:0),
+      certificate_pdf:d.cert_url||null,
+      public_key_url:(d.signature&&d.signature.key_id)?('https://api.dcsai.ai/keys/'+d.signature.key_id+'.public.pem'):null,
+      receipts:receipts||[],
+      how_to_verify:'Each receipt CID = sha256 of its canonical JSON. Verify each ed25519 signature against the published public key (public_key_url). The receipt CIDs form the Merkle root (merkle_root), anchored on Base (anchor.tx). No account or trust in DCS required.'
+    };
+  }
+  function downloadBundle(){
+    var btn=document.getElementById('bvDownload'); var t=btn?btn.textContent:'';
+    if(btn) btn.textContent='Preparing…';
+    fetchChain().then(function(rs){
+      var blob=new Blob([JSON.stringify(buildBundle(rs),null,2)],{type:'application/json'});
+      var u=URL.createObjectURL(blob);
+      var a=document.createElement('a'); a.href=u; a.download='dcs-session-'+id+'.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ try{URL.revokeObjectURL(u);}catch(e){} },60000);
+      if(btn) btn.textContent=t;
+    });
+  }
+  function fallbackCopy(txt){ var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} ta.remove(); }
+  function copyBundle(){
+    var btn=document.getElementById('bvCopy');
+    fetchChain().then(function(rs){
+      var txt=JSON.stringify(buildBundle(rs),null,2);
+      var done=function(){ if(btn){ btn.textContent='✓ Copied'; setTimeout(function(){ btn.textContent='Copy proof'; },1500); } };
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ fallbackCopy(txt); done(); }); }
+      else { fallbackCopy(txt); done(); }
+    });
+  }
   function render(d){
     LAST_DATA=d;
     document.getElementById('bvLede').textContent='This site was produced by DCS’s signed agent pipeline. Every check below is independently re-verifiable.';
@@ -226,10 +277,14 @@
     var acts='';
     acts += '<button class="btn ghost" id="bvViewReceipts" style="cursor:pointer">View all '+esc(d.receipt_count||1)+' receipts ↓</button>';
     if(d.cert_url) acts += '<a class="btn primary" href="'+esc(d.cert_url)+'" target="_blank" rel="noopener">Download certificate (PDF) ↓</a>';
+    acts += '<button class="btn ghost" id="bvDownload" style="cursor:pointer">Download session (.json) ↓</button>';
+    acts += '<button class="btn ghost" id="bvCopy" style="cursor:pointer">Copy proof</button>';
     if(anchored)  acts += '<a class="btn ghost" href="'+esc(d.anchor.explorer)+'" target="_blank" rel="noopener">View on Basescan ↗</a>';
     document.getElementById('bvActions').innerHTML = acts;
     var vb=document.getElementById('bvViewReceipts');
     if(vb) vb.onclick=toggleReceipts;
+    var db=document.getElementById('bvDownload'); if(db) db.onclick=downloadBundle;
+    var cpb=document.getElementById('bvCopy'); if(cpb) cpb.onclick=copyBundle;
   }
   // ---- All-receipts table: every per-receipt hash that feeds the Merkle root ----
   // Auditor view. Pulls the full chain from /unified-chain and lists each receipt's
@@ -242,8 +297,12 @@
   function rcptRow(i, r){
     var hash = r.cid || r.this_cid || '';
     var sig = (r.signature && r.signature.value) ? '✓' : '—';
-    var gw='https://gateway.lighthouse.storage/ipfs/';
-    var hc = hash ? '<a href="'+gw+encodeURIComponent(hash)+'" target="_blank" rel="noopener" style="color:#4aa3ff;text-decoration:none;word-break:break-all">'+esc(hash)+'</a>' : '—';
+    // Raw JSON opens the canonical receipt straight from the verified chain data
+    // already loaded on this page — same-origin, valid TLS, no dependency on a
+    // third-party IPFS gateway's certificate or uptime (the old link went to
+    // gateway.lighthouse.storage, whose cert throws NET::ERR_CERT_COMMON_NAME_INVALID).
+    // The printed CID stays the trust root: re-hash this JSON and it must equal the CID.
+    var hc = hash ? '<a href="#" onclick="return openRcpt('+i+')" title="Open the raw signed receipt JSON" style="color:#4aa3ff;text-decoration:none;word-break:break-all;cursor:pointer">'+esc(hash)+'</a>' : '—';
     var bt='1px solid #1f1f29';
     return '<tr>'
       +'<td style="color:#6a6a78;padding:7px 10px;border-top:'+bt+';font-variant-numeric:tabular-nums">'+(i+1)+'</td>'
@@ -252,9 +311,25 @@
       +'<td style="padding:7px 10px;border-top:'+bt+';color:#34d399;text-align:center">'+sig+'</td>'
       +'</tr>';
   }
+  // Open one receipt's raw JSON in a new tab as a same-origin Blob. This is the
+  // canonical signed envelope the chain returned — no external gateway, so it
+  // can never hit the Lighthouse cert error. Blob URL is revoked after a minute.
+  var RCPTS = [];
+  function openRcpt(i){
+    try {
+      var r = RCPTS[i];
+      if(!r){ return false; }
+      var blob = new Blob([JSON.stringify(r, null, 2)], { type: 'application/json' });
+      var u = URL.createObjectURL(blob);
+      window.open(u, '_blank', 'noopener');
+      setTimeout(function(){ try{ URL.revokeObjectURL(u); }catch(e){} }, 60000);
+    } catch(e){}
+    return false;
+  }
   function renderReceipts(rs){
     var box=document.getElementById('bvReceipts');
     if(!rs || !rs.length){ box.innerHTML='<div style="font-family:monospace;font-size:12px;color:#9c9ca8;padding:10px">No individual receipts returned for this session.</div>'; return; }
+    RCPTS = rs;
     box.innerHTML = receiptsHtml(rs);
     box.setAttribute('data-loaded','1');
   }
