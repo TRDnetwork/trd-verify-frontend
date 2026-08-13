@@ -296,7 +296,11 @@
   }
   function rcptRow(i, r){
     var hash = r.cid || r.this_cid || '';
-    var sig = (r.signature && r.signature.value) ? '✓' : '—';
+    // The /verify endpoint returns a boolean `signed` per receipt; the
+    // /unified-chain shape instead nests signature.value. Accept either so the
+    // per-row ✓ reflects reality (these receipts ARE signed — 38/38 valid) and
+    // doesn't render an empty "—" column against a fully-signed chain.
+    var sig = (r.signed || (r.signature && r.signature.value)) ? '✓' : '—';
     // Raw JSON opens the canonical receipt straight from the verified chain data
     // already loaded on this page — same-origin, valid TLS, no dependency on a
     // third-party IPFS gateway's certificate or uptime (the old link went to
