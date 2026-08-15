@@ -226,7 +226,8 @@
       generated_at:new Date().toISOString(),
       session_id:id,
       verify_url:'https://verify.dcsai.ai/?id='+id,
-      valid: !!(d.status==='valid' && d.signature && d.signature.valid),
+      valid: !!(d.status==='valid' && d.signature && d.signature.valid && d.revocation!=='revoked'),
+      revocation:d.revocation||'unknown',
       cid:d.cid||null,
       signature:d.signature||null,
       anchor:d.anchor||null,
@@ -235,7 +236,7 @@
       certificate_pdf:d.cert_url||null,
       public_key_url:(d.signature&&d.signature.key_id)?('https://api.dcsai.ai/keys/'+d.signature.key_id+'.public.pem'):null,
       receipts:receipts||[],
-      how_to_verify:'Verify each receipt\u2019s ed25519 signature against the published public key (public_key_url). Each receipt is content-addressed by its storage CID (the cid field, an IPFS CID where the signed receipt is pinned); receipts are hash-chained via prev_receipt_cid, which references the previous receipt\u2019s storage CID. Separately, the Merkle root (merkle_root) is an RFC 6962 tree over the receipts \u2014 leaf = SHA-256(0x00 || canonical receipt bytes), node = SHA-256(0x01 || left || right) \u2014 and that root is anchored on Base (anchor.tx, anchor.root). No account or trust in DCS required.'
+      how_to_verify:'Verify each receipt\u2019s ed25519 signature against the published public key (public_key_url). Each receipt is content-addressed by its storage CID (the cid field, an IPFS CID where the signed receipt is pinned); receipts are hash-chained via prev_receipt_cid, which references the previous receipt\u2019s storage CID. Separately, the Base anchor (anchor.tx, anchor.root) commits a SHA-256 Merkle root over the ordered list of receipt storage CIDs (leaf = SHA-256(CID), node = SHA-256(left || right)); rebuild it from the CIDs of all receipts sharing that anchor. The audit export additionally publishes an RFC 6962 tree over the canonical receipt bytes (leaf = SHA-256(0x00 || bytes), node = SHA-256(0x01 || left || right)) with O(log n) inclusion proofs \u2014 a separate commitment from the on-chain CID anchor. No account or trust in DCS required.'
     };
   }
   function downloadBundle(){
@@ -264,14 +265,18 @@
     LAST_DATA=d;
     document.getElementById('bvLede').textContent='This site was produced by DCS’s signed agent pipeline. Every check below is independently re-verifiable.';
     var sigOk = d.signature && d.signature.valid;
+    var rev = d.revocation || 'unknown';
     var anchored = d.anchor && d.anchor.status==='anchored' && d.anchor.tx;
-    var body = '<div class="statusline"><span class="dot"></span> Valid · signed by '+esc(d.issuer||'DCS Labs')+'</div>';
+    var overallOk = sigOk && d.status==='valid' && rev!=='revoked';
+    var body = '<div class="statusline"><span class="dot"></span> '+(overallOk?'Valid':'Review')+' · signed by '+esc(d.issuer||'DCS Labs')+'</div>';
     body += row('CID', esc(d.cid||'—'));
     body += row('Signature', sigOk ? '✓ verified ('+esc(d.signature.algo||'ed25519')+')' : '— not signed', sigOk?'ok':'');
     body += anchored
       ? row('Anchor','✓ Base · <a href="'+esc(d.anchor.explorer)+'" target="_blank" rel="noopener" style="color:inherit">'+esc(String(d.anchor.tx).slice(0,8))+'… ↗</a>','ok')
       : row('Anchor','· Base · anchoring…');
-    body += row('Status', d.status==='valid' ? '✓ not revoked' : esc(d.status), d.status==='valid'?'ok':'');
+    var revLabel = rev==='not_revoked' ? '✓ not revoked' : (rev==='revoked' ? '✗ REVOKED' : '— not checked');
+    body += row('Revocation', revLabel, rev==='not_revoked'?'ok':'');
+    body += row('Verification', d.status==='valid' ? '✓ signatures + chain verified' : esc(d.status), d.status==='valid'?'ok':'');
     body += row('Receipts', esc(d.receipt_count||1)+' in chain');
     if(d.signature && d.signature.key_id) body += row('Signing key', esc(d.signature.key_id));
     if(anchored && d.anchor.root) body += row('Merkle root', '<span style="word-break:break-all">'+esc(d.anchor.root)+'</span>', 'ok');
