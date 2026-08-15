@@ -24,7 +24,7 @@
     <h1 class="hero-title reveal" style="font-size:clamp(30px,5vw,52px)">Site <span class="em">verified</span>.</h1>
     <p class="lede reveal" id="bvLede">Checking the signed receipt for this build…</p>
     <div class="verify-mock reveal" id="bvCard" style="max-width:680px">
-      <div class="bar"><span class="d" style="background:#ff6b6b"></span><span class="d" style="background:#f0b341"></span><span class="d" style="background:#1e7eff"></span><span style="margin-left:8px" id="bvBarUrl">verify.dcslabs.ai</span></div>
+      <div class="bar"><span class="d" style="background:#ff6b6b"></span><span class="d" style="background:#f0b341"></span><span class="d" style="background:#1e7eff"></span><span style="margin-left:8px" id="bvBarUrl">verify.dcsai.ai</span></div>
       <div class="body" id="bvBody">
         <div class="statusline"><span class="dot" style="background:#f0b341"></span> Loading…</div>
       </div>
@@ -133,7 +133,7 @@
         <svg width="18" height="18" viewBox="0 0 20 20"><path d="M5 10l3 3 7-7" stroke="#34d399" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Verified by DCS <span class="sub">DCS Verify</span>
       </span>
-      <code class="code-chip">&lt;script src="https://verify.dcslabs.ai/badge.js" data-cid="sha256:…"&gt;&lt;/script&gt;</code>
+      <code class="code-chip">&lt;script src="https://verify.dcsai.ai/badge.js" data-cid="sha256:…"&gt;&lt;/script&gt;</code>
     </div>
   </section>
 
@@ -195,7 +195,7 @@
   var IPFS_GW='https://lazy-wombat-9yhf0.lighthouseweb3.xyz';
   var LAST_DATA=null;            // last verify response (carries the receipts list)
   var shortId = id.length>12 ? id.slice(0,8)+'…' : id;
-  document.getElementById('bvBarUrl').textContent='verify.dcslabs.ai/?id='+shortId;
+  document.getElementById('bvBarUrl').textContent='verify.dcsai.ai/?id='+shortId;
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   function row(k,v,cls){return '<div class="vrow"><span class="lbl">'+k+'</span><span class="val '+(cls||'')+'">'+v+'</span></div>';}
   function amber(msg){
@@ -225,7 +225,7 @@
       format:'dcs-session-proof/v1',
       generated_at:new Date().toISOString(),
       session_id:id,
-      verify_url:'https://verify.dcslabs.ai/?id='+id,
+      verify_url:'https://verify.dcsai.ai/?id='+id,
       valid: !!(d.status==='valid' && d.signature && d.signature.valid),
       cid:d.cid||null,
       signature:d.signature||null,
@@ -235,7 +235,7 @@
       certificate_pdf:d.cert_url||null,
       public_key_url:(d.signature&&d.signature.key_id)?('https://api.dcsai.ai/keys/'+d.signature.key_id+'.public.pem'):null,
       receipts:receipts||[],
-      how_to_verify:'Each receipt CID = sha256 of its canonical JSON. Verify each ed25519 signature against the published public key (public_key_url). The receipt CIDs form the Merkle root (merkle_root), anchored on Base (anchor.tx). No account or trust in DCS required.'
+      how_to_verify:'Verify each receipt\u2019s ed25519 signature against the published public key (public_key_url). Each receipt is content-addressed by its storage CID (the cid field, an IPFS CID where the signed receipt is pinned); receipts are hash-chained via prev_receipt_cid, which references the previous receipt\u2019s storage CID. Separately, the Merkle root (merkle_root) is an RFC 6962 tree over the receipts \u2014 leaf = SHA-256(0x00 || canonical receipt bytes), node = SHA-256(0x01 || left || right) \u2014 and that root is anchored on Base (anchor.tx, anchor.root). No account or trust in DCS required.'
     };
   }
   function downloadBundle(){
