@@ -68,7 +68,7 @@
 
 <div class="wrap">
   <div class="hero">
-    <div class="eyebrow"><span class="gd"></span> Public · account-free · verify without trusting us</div>
+    <div class="eyebrow"><span class="gd"></span> Public · account-free · verify against the chain, not against us</div>
     <h1>Explore the trust network</h1>
     <p>Search issuers, credentials, and domains. Inspect the whole network yourself.</p>
     <div class="search">
@@ -173,7 +173,7 @@
   <div class="ttl">FAQ</div>
   <h2>Frequently asked questions</h2>
   <p class="sub">Receipts, chains, IDs, and how independent verification works.</p>
-  <details><summary>What is a DCS receipt?</summary><div class="a">A receipt is a cryptographic record of one AI action &mdash; what happened, when, which system did it, and a fingerprint of the result. Unlike a log, it's <b>signed</b> and <b>content-addressed</b>, so anyone can verify it later <b>without trusting us</b>.</div></details>
+  <details><summary>What is a DCS receipt?</summary><div class="a">A receipt is a cryptographic record of one AI action &mdash; what happened, when, which system did it, and a fingerprint of the result. Unlike a log, it's <b>signed</b> and <b>content-addressed</b>, so anyone can verify it later <b>against the issuer&rsquo;s on-chain key rather than against us</b>.</div></details>
   <details><summary>Session ID vs Receipt CID vs hash &mdash; what's the difference?</summary><div class="a">A <b>Session ID</b> (a UUID) identifies one build, which contains many receipts. A <b>Receipt CID</b> (<code>bafk&hellip;</code>) is the IPFS address of a single receipt. A <b>sha256:&hellip;</b> value is a content fingerprint. Rule of thumb: paste a <b>Session ID</b> to verify a whole build, a <b>CID</b> to verify one receipt.</div></details>
   <details><summary>How many receipts does a build create?</summary><div class="a">One per recorded action (run), plus a few lifecycle receipts (<code>build_complete</code>, <code>memory_write</code>). So 10 runs &asymp; 11&ndash;12 in chain, and 50 runs &asymp; 52&ndash;53 in chain. The count tracks <b>actions</b>, not agents &mdash; one agent can take several actions.</div></details>
   <details><summary>What does &ldquo;N in chain&rdquo; mean?</summary><div class="a">The number of receipts linked together for that build. Each receipt carries the hash of the one before it (<code>prev_receipt_cid</code>), forming a tamper-evident chain &mdash; change any receipt and every later link breaks.</div></details>
